@@ -1,33 +1,32 @@
 from bs4 import BeautifulSoup
 import re
-from datetime import datetime
 import sys, uuid
 import urllib.request, json
 class HtmlFactory():
     def getUrls(self, html):
         urls = []
         sp = BeautifulSoup(html,'html.parser')
-        contents = sp.find_all('span', {'class':'p_title'})
-        
-        for content in contents:
-            all_links = content.find_all('a', {'target':'_blank'})
-            for link in all_links:
-                href = link.get('href')
-                #linkClass = link.get('class')
-                if href != None and href not in urls:
-                    urls.append(href)
-                    #print(href)
+        content = sp.find_all('h3', {'class':'r'})
+        for t in content:
+            hrefs = t.find('a')
+            href = hrefs.get('href')
+            index = href.find('http://tieba.baidu.com/p/')
+            if index > -1:
+                urls.append(href)
+        print('url')
         return urls
     def getContent(self, html):
         sp = BeautifulSoup(html,'html.parser')
         content = sp.find('div', {'class':'p_content'})
+        print('content')
         return content.get_text().replace(',','，').replace('\n','').replace('\r','').replace(' ','')
     def getAuthor(self, html):
         sp = BeautifulSoup(html,'html.parser')
         content = sp.find('a', {'alog-group':'p_author'})
-        print(str(content))
+        #print(str(content))
         if content is None:
             return ''
+        print('author')
         return content.get_text().replace(',','，').replace('\n','').replace('\r','')
     def getDate(self, html):
         #print(html)
@@ -38,10 +37,12 @@ class HtmlFactory():
         match = re.search('\d{4}-\d{2}-\d{2}', str(content))
         if match is None:
             return ''
+        print('date')
         return match.group(0)
     def getTitle(self, html):
         sp = BeautifulSoup(html,'html.parser')
         content = sp.find('title')
+        print('title')
         return content.get_text().replace(',','，').replace('\n','').replace('\r','')
     def getComment(self, html):
         
@@ -61,48 +62,36 @@ class HtmlFactory():
             #print( nickname + content )
             #print('\n')
             comments = comments + '[%s:%s]' % (nickname, content )
-        
+        print('comment')
         return comments.replace(',','，').replace('\n','').replace('\r','')
-    def downloadImg(self, html):
-        sp = BeautifulSoup(html,'html.parser')
-        content = sp.find('div', {'class':'rich_media_content'})
-        imgs = content.find_all('img')
-        if len(imgs) <= 0:
-            return
-        for img in imgs:
-            href = img.get('data-src')
-            imgFormat = img.get('data-type')
-            if href == None or imgFormat == None:
-                continue
-            if imgFormat == 'jpeg':
-                imgFormat = 'jpg'
-            print( imgFormat )
-           
-            try:
-                urllib.request.urlretrieve(href, './Images/' + str(uuid.uuid4()) + '.%s' % imgFormat)
-            except:
-                print ('download img error' )
-       
+'''hFt = HtmlFactory()
+non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
+headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+i = 0
+while i <= 1000:
+    request = urllib.request.Request("https://www.google.com.tw/search?q=" + '%E9%9B%B7%E6%B4%8B' + "+site%3Ahttps%3A%2F%2Ftieba.baidu.com%2F" + "&start=" + str(i) ,headers=headers)
+    #start: 第幾筆
+    html = urllib.request.urlopen(request)
+    txtHtml = html.read().decode('utf8', errors='ignore').translate(non_bmp_map)
+    sp = BeautifulSoup(txtHtml,'html.parser')
+    txtHtml = sp.find_all('h3', {'class':'r'})
+    for t in txtHtml:
+        hrefs = t.find('a')
+        href = hrefs.get('href')
+        index = href.find('http://tieba.baidu.com/p/')
+        if index > -1:
+            print(t.get_text() + '\t' + href, file=open("1111111.txt","a+",encoding='UTF-8'))
+    #hFt.downloadImg(txtHtml)
+    html.close()'''
+    
+'''hFt = HtmlFactory()
+non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
+headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+i = 0
 
-    def getLastPage(self,html):
-        
-        sp = BeautifulSoup(html,'html.parser')
-        content = sp.find('a', {'class':'last'})
-        if content is None:
-            return -1
-        href = content.get('href')
-        print( 'Last Page is ' + href[href.find('&pn')+4:] )
-        return int(href[href.find('&pn')+4:])
-#hFt = HtmlFactory()
-#non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
-#html = urllib.request.urlopen('http://tieba.baidu.com/f/search/res?only_thread=1&pn=76&qw=%C0%D7%D1%F3')
-
-#txtHtml = html.read().decode('utf8', errors='ignore').translate(non_bmp_map)
-#print(hFt.getLastPage(txtHtml))
-#print(hFt.getContent(txtHtml))
-#print(hFt.getAuthor(txtHtml))
-#print(hFt.getDate(txtHtml))
-#print(hFt.getTitle(txtHtml))
-#print(hFt.getComment(txtHtml))
-#hFt.downloadImg(txtHtml)
-#html.close()
+request = urllib.request.Request('http://tieba.baidu.com/p/4538080535' ,headers=headers)
+#start: 第幾筆
+html = urllib.request.urlopen(request)
+txtHtml = html.read().decode('utf8', errors='ignore').translate(non_bmp_map)
+html.close()
+print(txtHtml)'''

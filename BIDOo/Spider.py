@@ -102,7 +102,7 @@ class Ui_MainWindow(object):
         
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Spider"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "BIDO_Spider"))
         self.GoButton.setText(_translate("MainWindow", "Go"))
         self.showStatus.setText(_translate("MainWindow", "尚未開始"))
         self.label.setText(_translate("MainWindow", "起始頁數"))
